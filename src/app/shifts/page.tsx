@@ -6,6 +6,10 @@ export default async function ShiftsPage() {
   const result = await getEmployees()
   const employees = result.success ? result.data : []
 
+  if (!employees) {
+    return null
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 pb-12">
       {/* ヘッダー部分 */}
