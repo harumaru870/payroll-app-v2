@@ -7,15 +7,17 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/');
       const isOnLogin = nextUrl.pathname.startsWith('/login');
 
-      if (isOnDashboard) {
-        if (isOnLogin) return true; // ログインページは誰でもアクセス可
-        if (isLoggedIn) return true;
-        return false; // 未ログインならログインページへリダイレクト
+      if (isOnLogin) {
+        return true; // ログインページは誰でもアクセス可
       }
-      return true;
+      
+      if (isLoggedIn) {
+        return true; // ログイン済みならアクセス可
+      }
+      
+      return false; // 未ログインならログインページへリダイレクト
     },
   },
   providers: [], // ここは空にしておく（auth.tsで設定）
