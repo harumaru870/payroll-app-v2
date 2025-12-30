@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  trustHost: true, // Vercelなどのホストプロキシ環境で必要
   providers: [
     Credentials({
       async authorize(credentials) {
