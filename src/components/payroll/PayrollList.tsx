@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { calculateMonthlyPayroll, getSettings } from '@/app/actions'
 import { PayrollResult } from '@/utils/payroll'
-import { ChevronLeft, ChevronRight, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react'
-import { format } from 'date-fns'
+import { ChevronLeft, ChevronRight, FileText, Download, ChevronDown, ChevronUp, Moon } from 'lucide-react'
+import { format, isSameDay } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { pdf } from '@react-pdf/renderer'
 import PayslipDocument from './PayslipDocument'
+import { formatTimeWithOver24 } from '@/utils/date'
 
 type PayrollData = {
   employee: {
@@ -263,6 +264,7 @@ export default function PayrollList() {
                           {payroll.shifts.map((shift) => {
                             const workMinutes = (shift.endTime ? (new Date(shift.endTime).getTime() - new Date(shift.startTime).getTime()) / 60000 : 0) - shift.breakTime
                             const workHours = workMinutes > 0 ? (workMinutes / 60).toFixed(2) : '0.00'
+                            const isOvernight = shift.endTime && !isSameDay(new Date(shift.startTime), new Date(shift.endTime))
                             
                             return (
                               <tr key={shift.id} className="hover:bg-blue-50 transition-colors">
@@ -270,7 +272,15 @@ export default function PayrollList() {
                                   {format(new Date(shift.date), 'MM/dd (E)', { locale: ja })}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                                  {format(new Date(shift.startTime), 'HH:mm')} - {shift.endTime ? format(new Date(shift.endTime), 'HH:mm') : '--:--'}
+                                  <div className="flex items-center">
+                                    {format(new Date(shift.startTime), 'HH:mm')} - {shift.endTime ? formatTimeWithOver24(new Date(shift.endTime), new Date(shift.startTime)) : '--:--'}
+                                    {isOvernight && (
+                                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200" title="日をまたぐ勤務">
+                                        <Moon className="w-3 h-3 mr-1" />
+                                        翌日
+                                      </span>
+                                    )}
+                                  </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                   {shift.breakTime}分

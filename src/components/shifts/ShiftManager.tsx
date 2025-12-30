@@ -6,7 +6,8 @@ import 'react-calendar/dist/Calendar.css'
 import { format, addMinutes, subMinutes } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { createShift, updateShift, deleteShift, getShifts, getSettings } from '@/app/actions'
-import { Trash2, Clock, User as UserIcon, Edit2, X, Plus, Minus } from 'lucide-react'
+import { Trash2, Clock, User as UserIcon, Edit2, X, Plus, Minus, AlertTriangle } from 'lucide-react'
+import { formatTimeWithOver24 } from '@/utils/date'
 
 type Employee = {
   id: string
@@ -261,6 +262,16 @@ export default function ShiftManager({ employees }: { employees: Employee[] }) {
                   />
                   <button type="button" onClick={() => adjustTime('end', 30)} className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"><Plus className="w-4 h-4" /></button>
                 </div>
+                {/* 翌日警告 */}
+                {startTime && endTime && startTime > endTime && (
+                  <div className="mt-2 p-3 bg-amber-50 text-amber-800 text-xs font-bold rounded-lg flex items-start border border-amber-200 animate-in fade-in slide-in-from-top-1">
+                    <AlertTriangle className="w-4 h-4 mr-1.5 flex-shrink-0 mt-0.5" />
+                    <span>
+                      終了時刻が開始時刻より前です。<br/>
+                      翌日の {endTime} (26時表記など) として登録されます。
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -350,7 +361,7 @@ export default function ShiftManager({ employees }: { employees: Employee[] }) {
                       <div className="font-black text-gray-900 text-lg mb-1">{shift.user.name}</div>
                       <div className="text-sm text-gray-700 flex items-center font-bold">
                         <Clock className="w-4 h-4 mr-1.5 text-blue-600" />
-                        {format(shift.startTime, 'HH:mm')} 〜 {shift.endTime ? format(shift.endTime, 'HH:mm') : '--:--'}
+                        {format(shift.startTime, 'HH:mm')} 〜 {shift.endTime ? formatTimeWithOver24(shift.endTime, shift.startTime) : '--:--'}
                         <span className="ml-3 px-2.5 py-1 bg-gray-100 text-gray-800 rounded-lg text-[11px] border border-gray-200">
                           休憩 {shift.breakTime}分
                         </span>

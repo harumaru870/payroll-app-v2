@@ -1,8 +1,33 @@
 import Link from 'next/link'
+import { auth, signOut } from '@/auth'
+import { LogOut, User } from 'lucide-react'
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {/* ログインユーザー情報とログアウトボタン */}
+      <div className="absolute top-4 right-4 flex items-center space-x-4">
+        {session?.user && (
+          <div className="flex items-center text-sm font-bold text-gray-600 bg-white py-2 px-4 rounded-full shadow-sm border border-gray-200">
+             <User className="w-4 h-4 mr-2 text-blue-500" />
+             {session.user.email}
+          </div>
+        )}
+        <form
+          action={async () => {
+            'use server';
+            await signOut();
+          }}
+        >
+          <button className="flex items-center text-sm font-bold text-red-600 bg-white hover:bg-red-50 py-2 px-4 rounded-full shadow-sm border border-gray-200 transition-colors">
+            <LogOut className="w-4 h-4 mr-2" />
+            ログアウト
+          </button>
+        </form>
+      </div>
+
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
@@ -103,7 +128,7 @@ export default function Home() {
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-              機能実装: 従業員・シフト・給与・PDF・設定 (完了)
+              Authentication (NextAuth.js): 保護済み
             </li>
           </ul>
         </div>

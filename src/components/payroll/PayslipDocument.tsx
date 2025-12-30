@@ -1,8 +1,9 @@
 'use client'
 
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
-import { format } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { PayrollResult } from '@/utils/payroll'
+import { formatTimeWithOver24 } from '@/utils/date'
 
 // 日本語フォントを登録
 Font.register({
@@ -270,12 +271,21 @@ export default function PayslipDocument({ year, month, employeeName, payroll, co
           {payroll.shifts.map((shift, index) => {
              const workMin = (shift.endTime ? (new Date(shift.endTime).getTime() - new Date(shift.startTime).getTime()) / 60000 : 0) - shift.breakTime
              const totalDaily = shift.dailySalary + shift.dailyTransport
+             const isOvernight = shift.endTime && !isSameDay(new Date(shift.startTime), new Date(shift.endTime))
+
              return (
               <View key={index} style={styles.tableRow} wrap={false}>
                 <Text style={[styles.tableCol, { width: '12%' }]}>{format(new Date(shift.date), 'MM/dd')}</Text>
-                <Text style={[styles.tableCol, { width: '24%' }]}>
-                  {format(new Date(shift.startTime), 'HH:mm')}-{shift.endTime ? format(new Date(shift.endTime), 'HH:mm') : ''}
-                </Text>
+                <View style={[styles.tableCol, { width: '24%', flexDirection: 'row', alignItems: 'center' }]}>
+                  <Text>
+                    {format(new Date(shift.startTime), 'HH:mm')}-{shift.endTime ? formatTimeWithOver24(new Date(shift.endTime), new Date(shift.startTime)) : ''}
+                  </Text>
+                  {isOvernight && (
+                    <View style={{ marginLeft: 4, backgroundColor: '#E0E7FF', paddingHorizontal: 2, paddingVertical: 1, borderRadius: 2 }}>
+                      <Text style={{ fontSize: 6, color: '#3730A3' }}>翌日</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={[styles.tableCol, { width: '10%', textAlign: 'right' }]}>{shift.breakTime}m</Text>
                 <Text style={[styles.tableCol, { width: '10%', textAlign: 'right' }]}>{(workMin / 60).toFixed(1)}h</Text>
                 <Text style={[styles.tableCol, { width: '14%', textAlign: 'right' }]}>¥{shift.dailySalary.toLocaleString()}</Text>
